@@ -1,0 +1,4 @@
+env = "dev"
+storageParg = "./storage"
+migrationsPath = "./migrations"
+port = ":8080"

@@ -1,0 +1,4 @@
+env: "dev"
+storage_path: "./storage/notes.db"
+migrations_path: "./migrations"
+port: ":8080"
