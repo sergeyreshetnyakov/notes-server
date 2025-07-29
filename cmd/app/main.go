@@ -24,7 +24,8 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	notehandler.New(log, notes.New(notestorage.New(cfg.StoragePath))).HandleRoutes(mux)
+	storage, shutdownDB := notestorage.New(cfg.StoragePath, log)
+	notehandler.New(log, notes.New(storage)).HandleRoutes(mux)
 
 	wrappedMux := middlewares.LoggingMiddleware(mux, log)
 	server := http.Server{
@@ -53,5 +54,6 @@ func main() {
 	if err := server.Shutdown(shutdownCtx); err != nil {
 		log.Error("HTTP shutdown error: %v", sl.Err(err))
 	}
+	shutdownDB()
 	log.Info("Graceful shutdown complete")
 }

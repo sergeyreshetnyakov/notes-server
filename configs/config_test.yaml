@@ -1,0 +1,4 @@
+env: "dev"
+storage_path: "./storage/test.db"
+migrations_path: "./migrations"
+port: ":8080"

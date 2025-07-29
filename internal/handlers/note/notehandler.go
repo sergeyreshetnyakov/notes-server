@@ -18,9 +18,9 @@ type Handler struct {
 
 type Notes interface {
 	GetAll(ctx context.Context) (notes []models.Note, err error)
-	Add(ctx context.Context, header string, content string) (err error)
-	Edit(ctx context.Context, header string, content string, id int) (err error)
-	Delete(ctx context.Context, id int) (err error)
+	Add(ctx context.Context, header string, content string) (id int64, err error)
+	Edit(ctx context.Context, header string, content string, id int64) (err error)
+	Delete(ctx context.Context, id int64) (err error)
 }
 
 func New(log *slog.Logger, notes Notes) Handler {
@@ -77,11 +77,15 @@ func (h Handler) Add(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.notes.Add(r.Context(), msg.Header, msg.Content); err != nil {
+	id, err := h.notes.Add(r.Context(), msg.Header, msg.Content)
+	if err != nil {
 		http.Error(w, "Failed to add new note: "+err.Error(), http.StatusInternalServerError)
 		h.log.Info("Failed to add new note", sl.Err(err))
 		return
 	}
+
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]int64{"id": id})
 }
 
 func (h Handler) Edit(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +97,7 @@ func (h Handler) Edit(w http.ResponseWriter, r *http.Request) {
 	var msg struct {
 		Header  string `json:"header"`
 		Content string `json:"content"`
-		Id      int    `json:"id"`
+		Id      int64  `json:"id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
 		http.Error(w, "Failed to decode request body: "+err.Error(), http.StatusBadRequest)
@@ -114,7 +118,7 @@ func (h Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	)
 
 	var msg struct {
-		Id int `json:"id"`
+		Id int64 `json:"id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
 		http.Error(w, "Failed to decode request body: "+err.Error(), http.StatusBadRequest)
