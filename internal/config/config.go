@@ -20,10 +20,10 @@ func MustLoad() Config {
 		panic("config path is empty")
 	}
 
-	return mustLoadPath(configPath)
+	return MustLoadPath(configPath)
 }
 
-func mustLoadPath(configPath string) Config {
+func MustLoadPath(configPath string) Config {
 	var cfg Config
 
 	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
