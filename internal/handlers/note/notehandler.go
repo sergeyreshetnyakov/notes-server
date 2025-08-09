@@ -46,10 +46,11 @@ func (h Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 	notes, err := h.notes.GetAll(r.Context())
 	if err != nil {
 		http.Error(w, "Failed to get notes: "+err.Error(), http.StatusInternalServerError)
-		h.log.Info("Failed to get notes", sl.Err(err))
+		h.log.Error("Failed to get notes", sl.Err(err))
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string][]models.Note{"notes": notes})
 }
@@ -66,24 +67,25 @@ func (h Handler) Add(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
 		http.Error(w, "Failed to decode request body: "+err.Error(), http.StatusBadRequest)
-		h.log.Info("Failed to decode request body", sl.Err(err))
+		h.log.Debug("Failed to decode request body", sl.Err(err))
 		return
 	}
 
 	if msg.Header == "" {
 		err := errors.New("Header must contain any characters")
 		http.Error(w, "Failed to add new note: "+err.Error(), http.StatusBadRequest)
-		h.log.Info("Failed to add new note", sl.Err(err))
+		h.log.Debug("Failed to add new note", sl.Err(err))
 		return
 	}
 
 	id, err := h.notes.Add(r.Context(), msg.Header, msg.Content)
 	if err != nil {
 		http.Error(w, "Failed to add new note: "+err.Error(), http.StatusInternalServerError)
-		h.log.Info("Failed to add new note", sl.Err(err))
+		h.log.Error("Failed to add new note", sl.Err(err))
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]int64{"id": id})
 }
@@ -101,14 +103,21 @@ func (h Handler) Edit(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
 		http.Error(w, "Failed to decode request body: "+err.Error(), http.StatusBadRequest)
-		h.log.Info("Failed to decode request body", sl.Err(err))
+		h.log.Debug("Failed to decode request body", sl.Err(err))
 		return
 	}
 
 	if err := h.notes.Edit(r.Context(), msg.Header, msg.Content, msg.Id); err != nil {
-		http.Error(w, "Failed to edit note: "+err.Error(), http.StatusInternalServerError)
-		h.log.Info("Failed to edit note", sl.Err(err))
+		if errors.Is(err, errors.New("note not found")) {
+			http.Error(w, "Failed to edit note:"+err.Error(), http.StatusNotFound)
+			h.log.Debug("Failed to edit note", sl.Err(err))
+		} else {
+			http.Error(w, "Failed to edit note: "+err.Error(), http.StatusInternalServerError)
+			h.log.Error("Failed to edit note", sl.Err(err))
+		}
+		return
 	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h Handler) Delete(w http.ResponseWriter, r *http.Request) {
@@ -122,13 +131,21 @@ func (h Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
 		http.Error(w, "Failed to decode request body: "+err.Error(), http.StatusBadRequest)
-		h.log.Info("Failed to decode request body", sl.Err(err))
+		h.log.Debug("Failed to decode request body", sl.Err(err))
 		return
 	}
 
 	err := h.notes.Delete(r.Context(), msg.Id)
 	if err != nil {
-		http.Error(w, "Failed to delete note: "+err.Error(), http.StatusInternalServerError)
-		h.log.Info("Failed to delete note", sl.Err(err))
+		if errors.Is(err, errors.New("note not found")) {
+			http.Error(w, "Failed to delete note:"+err.Error(), http.StatusNotFound)
+			h.log.Debug("Failed to delete note", sl.Err(err))
+		} else {
+			http.Error(w, "Failed to delete note: "+err.Error(), http.StatusInternalServerError)
+			h.log.Error("Failed to delete note", sl.Err(err))
+		}
+		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 }

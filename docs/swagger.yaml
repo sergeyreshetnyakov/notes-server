@@ -1,0 +1,63 @@
+paths:
+  /:
+    get:
+      summary: Returns a list of notes.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Note"
+    post:
+      summary: Adds a new note.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              type: object
+              properties:
+                id:
+                  type: integer
+        "400":
+          description: Failed to decode json body.
+          content:
+            text/plain:
+              type: string
+    patch:
+      summary: Corrects a note.
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Note not found.
+          content:
+            text/plain:
+              type: string
+        "400":
+          description: Failed to decode json body.
+          content:
+            text/plain:
+              type: string
+    delete:
+      summary: Deletes note.
+      responses:
+        "200":
+          description: OK
+
+components:
+  schemas:
+    Note:
+      type: object
+      properties:
+        id:
+          type: integer
+        header:
+          type: string
+        content:
+          type: string
+
+swagger: "2.0"
