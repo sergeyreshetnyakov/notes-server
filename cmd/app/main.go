@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/sergeyreshetnyakov/notion/docs"
 	"github.com/sergeyreshetnyakov/notion/internal/bussines/notes"
 	"github.com/sergeyreshetnyakov/notion/internal/config"
 	notehandler "github.com/sergeyreshetnyakov/notion/internal/handlers/note"
@@ -16,13 +17,31 @@ import (
 	"github.com/sergeyreshetnyakov/notion/internal/lib/logger/sl"
 	"github.com/sergeyreshetnyakov/notion/internal/middlewares"
 	notestorage "github.com/sergeyreshetnyakov/notion/internal/storage/notes"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
+
+//	@title			Notion
+//	@version		1.0
+//	@description	This is a notes server.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host		localhost:8080
+//	@BasePath	/api/v1
 
 func main() {
 	cfg := config.MustLoad()
 	log := logger.SetupLogger(cfg.Env)
 
 	mux := http.NewServeMux()
+
+	mux.Handle("GET /swagger/", httpSwagger.WrapHandler)
 
 	storage, shutdownDB := notestorage.New(cfg.StoragePath, log)
 	notehandler.New(log, notes.New(storage)).HandleRoutes(mux)

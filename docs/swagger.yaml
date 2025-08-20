@@ -1,63 +1,16 @@
-paths:
-  /:
-    get:
-      summary: Returns a list of notes.
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Note"
-    post:
-      summary: Adds a new note.
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              type: object
-              properties:
-                id:
-                  type: integer
-        "400":
-          description: Failed to decode json body.
-          content:
-            text/plain:
-              type: string
-    patch:
-      summary: Corrects a note.
-      responses:
-        "200":
-          description: OK
-        "404":
-          description: Note not found.
-          content:
-            text/plain:
-              type: string
-        "400":
-          description: Failed to decode json body.
-          content:
-            text/plain:
-              type: string
-    delete:
-      summary: Deletes note.
-      responses:
-        "200":
-          description: OK
-
-components:
-  schemas:
-    Note:
-      type: object
-      properties:
-        id:
-          type: integer
-        header:
-          type: string
-        content:
-          type: string
-
+basePath: /api/v1
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a notes server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Notion
+  version: "1.0"
+paths: {}
 swagger: "2.0"
