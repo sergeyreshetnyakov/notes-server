@@ -1,4 +1,17 @@
 basePath: /api/v1
+definitions:
+  models.Note:
+    properties:
+      content:
+        example: at 3 pm
+        type: string
+      header:
+        example: go for a walk
+        type: string
+      id:
+        example: 1
+        type: integer
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -12,5 +25,126 @@ info:
   termsOfService: http://swagger.io/terms/
   title: Notion
   version: "1.0"
-paths: {}
+paths:
+  /:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a note
+      parameters:
+      - description: Notes id
+        in: body
+        name: id
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: bad request body
+          schema:
+            type: string
+        "404":
+          description: note not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Delete note
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of notes
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Results per page
+        in: query
+        name: results
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Note'
+            type: array
+        "404":
+          description: page not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Get all notes
+    patch:
+      consumes:
+      - application/json
+      description: Edits a note
+      parameters:
+      - description: Notes body
+        in: body
+        name: note
+        required: true
+        schema:
+          $ref: '#/definitions/models.Note'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: bad request body
+          schema:
+            type: string
+        "404":
+          description: note not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Edit note
+    post:
+      consumes:
+      - application/json
+      description: Adds a new note
+      parameters:
+      - description: Notes header
+        in: body
+        name: header
+        required: true
+        schema:
+          type: string
+      - description: Notes content
+        in: body
+        name: content
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: bad request body
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Add note
 swagger: "2.0"
